@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request
 import requests
-
+import xml.etree.ElementTree as et
+tree = et.parse('keys.xml')
+owlApiKey = tree.find('string[@name="owlbot-key"]').text
 
 app = Flask(__name__)
 
@@ -10,15 +12,13 @@ def main():
     return render_template("index.html")
 
 
-@app.route('/detail/<path_val>')
-def detail(path_val):
-    r = requests.get('http://openapi.seoul.go.kr:8088/6d4d776b466c656533356a4b4b5872/json/RealtimeCityAir/1/99')
-    response = r.json()
-    rows = response['RealtimeCityAir']['row']
+@app.route('/detail/<keyword>')
+def detail(keyword):
+    r = requests.get(f'https://owlbot.info/api/v4/dictionary/{keyword}', headers={"Authorization": f'Token {owlApiKey}'})
+    result = r.json()
+    print(result)
 
-    req_word = request.args.get('word')
-
-    return render_template("detail.html", rows=rows, req_word=req_word, path_word=path_val)
+    return render_template("detail.html")
 
 
 if __name__ == '__main__':

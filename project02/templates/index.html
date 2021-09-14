@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Sparta Vocabulary Notebook</title>
 
+    <meta property="og:title" content="단어장프로젝트"/>
+    <meta property="og:description" content="Sparta-nb-단어장프로젝트"/>
+    <meta property="og:image" content="{{ url_for('static', filename='logo_red.png') }}"/>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
@@ -82,13 +88,13 @@
 
         let words = {{ words|tojson }};
         let word_list = [];
-        for (let i=0;i<words.length;i++) {
+        for (let i = 0; i < words.length; i++) {
             word_list.push(words[i]['word'])
         }
 
         function find_word() {
             let word = $('#input-word').val().toLowerCase();
-            if (word=="") { // 빈 문자 입력시 처리
+            if (word == "") { // 빈 문자 입력시 처리
                 alert('단어를 입력해주세요')
                 return;
             }
@@ -98,7 +104,7 @@
                 $(`#word-${word}`).siblings().removeClass()
                 $(`#word-${word}`)[0].scrollIntoView()
             } else {
-                window.location.href=`/detail/${word}?status=new`
+                window.location.href = `/detail/${word}?status=new`
             }
         }
     </script>
@@ -121,12 +127,12 @@
         </tr>
         </thead>
         <tbody id="tbody-box">
-            {% for word in words %}
+        {% for word in words %}
             <tr id="word-{{ word.word }}">
                 <td><a href="/detail/{{ word.word }}?status=saved">{{ word.word }}</a></td>
                 <td>{{ word.definition }}</td>
             </tr>
-            {% endfor %}
+        {% endfor %}
         </tbody>
     </table>
 </div>

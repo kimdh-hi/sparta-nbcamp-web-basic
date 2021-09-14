@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 from pymongo import MongoClient
 import requests
 
+import xml.etree.ElementTree as et
+tree = et.parse('keys.xml')
+owlApiKey = tree.find('string[@name="owlbot-key"]').text
 
 app = Flask(__name__)
 
@@ -17,8 +20,11 @@ def main():
 
 @app.route('/detail/<keyword>')
 def detail(keyword):
-    # API에서 단어 뜻 찾아서 결과 보내기
-    return render_template("detail.html", word=keyword)
+    r = requests.get(f'https://owlbot.info/api/v4/dictionary/{keyword}',
+                     headers={'Authorization' : f'Token {owlApiKey}'})
+    result = r.json()
+
+    return render_template("detail.html", word=keyword, result=result)
 
 
 @app.route('/api/save_word', methods=['POST'])

@@ -78,8 +78,12 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-end">
             <div>
-                <h1 id="word" style="display: inline;">owl</h1>
-                <h5 id="pronunciation" style="display: inline;">/oul/</h5>
+                <h1 id="word" style="display: inline;">{{ word }}</h1>
+
+                {% if result.pronunciation != None %}
+                    <h5 id="pronunciation" style="display: inline;">/{{ result.pronunciation }}/</h5>
+                {% endif %}
+
             </div>
             <button id="btn-save" class="btn btn-outline-sparta btn-lg">
                 <i class="fa fa-floppy-o" aria-hidden="true"></i>
@@ -89,14 +93,20 @@
             </button>
         </div>
         <hr>
+
         <div id="definitions">
+            {% for definition in result.definitions %}
             <div style="padding:10px">
-                <i>noun</i>
-                <br>a nocturnal bird of prey with large eyes, a facial disc, a hooked beak, and typically a loud
-                hooting call.<br>
-                <span class="example">I love reaching out into that absolute silence, when you can hear the owl or the wind.</span>
+                <i>{{ definition.type }}</i>
+                <br>{{ definition.definition.encode('ascii', 'ignore').decode('utf-8') }}<br>
+                {% if definition.example != None %}
+                    <!-- |safe : html태그를 허용 -->
+                    <span class="example">{{ definition.example.encode('ascii', 'ignore').decode('utf-8')|safe }}</span>
+                {% endif %}
             </div>
+            {% endfor %}
         </div>
+
     </div>
 </div>
 </body>

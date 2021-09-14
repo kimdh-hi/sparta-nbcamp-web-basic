@@ -65,7 +65,39 @@
         tbody:last-child tr:last-child td:last-child {
             border-radius: 0 0 10px 0;
         }
+
+        tr.highlight > td {
+            background-color: #e8344e;
+            color: white;
+        }
+
+        tr.highlight > td > a {
+            color: white;
+        }
     </style>
+    <script>
+        let words = {{ words|tojson }};
+        let word_list = [];
+        for (let i=0;i<words.length;i++) {
+            word_list.push(words[i]['word'])
+        }
+
+        function find_word() {
+            let word = $('#input-word').val().toLowerCase();
+            if (word=="") { // 빈 문자 입력시 처리
+                alert('단어를 입력해주세요')
+                return;
+            }
+            if (word_list.includes(word)) {
+                $(`#word-${word}`).addClass("highlight")
+                // 형제 태그의 스타일 클래스 제거
+                $(`#word-${word}`).siblings().removeClass()
+                $(`#word-${word}`)[0].scrollIntoView()
+            } else {
+                window.location.href=`/detail/${word}?status=new`
+            }
+        }
+    </script>
 </head>
 <body>
 <div class="wrap">
@@ -86,7 +118,7 @@
         </thead>
         <tbody id="tbody-box">
             {% for word in words %}
-            <tr id="word-word">
+            <tr id="word-{{ word.word }}">
                 <td><a href="/detail/{{ word.word }}?status=saved">{{ word.word }}</a></td>
                 <td>{{ word.definition }}</td>
             </tr>

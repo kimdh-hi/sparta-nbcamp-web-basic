@@ -70,6 +70,34 @@
             border-color: #e8344e;
         }
     </style>
+    <script>
+        function save_word() {
+            $.ajax({
+                type: "POST",
+                url: `/api/save_word`,
+                data: {
+                    word: "{{ word }}",
+                    definition: "{{ result.definitions[0].definition }}"
+                },
+                success: function (response) {
+                    alert(response["msg"])
+                    window.location.href = "/detail/{{ word }}?status=saved"
+                }
+            });
+        }
+
+        function delete_word() {
+            $.ajax({
+                type: "POST",
+                url: `/api/delete_word`,
+                data: {word:"{{word}}"},
+                success: function (response) {
+                    alert(response["msg"])
+                    window.location.href = "/"
+                }
+            });
+        }
+    </script>
 </head>
 <body>
 <div class="wrap">
@@ -85,25 +113,31 @@
                 {% endif %}
 
             </div>
-            <button id="btn-save" class="btn btn-outline-sparta btn-lg">
-                <i class="fa fa-floppy-o" aria-hidden="true"></i>
-            </button>
-            <button id="btn-delete" class="btn btn-sparta btn-lg">
-                <i class="fa fa-trash" aria-hidden="true"></i>
-            </button>
+
+            {% if status=="new" %}
+                <button onclick="save_word()" id="btn-save" class="btn btn-outline-sparta btn-lg">
+                    <i class="fa fa-floppy-o" aria-hidden="true"></i>
+                </button>
+            {% else %}
+                <button onclick="delete_word()" id="btn-delete" class="btn btn-sparta btn-lg">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                </button>
+            {% endif %}
+
+
         </div>
         <hr>
 
         <div id="definitions">
             {% for definition in result.definitions %}
-            <div style="padding:10px">
-                <i>{{ definition.type }}</i>
-                <br>{{ definition.definition.encode('ascii', 'ignore').decode('utf-8') }}<br>
-                {% if definition.example != None %}
-                    <!-- |safe : html태그를 허용 -->
-                    <span class="example">{{ definition.example.encode('ascii', 'ignore').decode('utf-8')|safe }}</span>
-                {% endif %}
-            </div>
+                <div style="padding:10px">
+                    <i>{{ definition.type }}</i>
+                    <br>{{ definition.definition.encode('ascii', 'ignore').decode('utf-8') }}<br>
+                    {% if definition.example != None %}
+                        <!-- |safe : html태그를 허용 -->
+                        <span class="example">{{ definition.example.encode('ascii', 'ignore').decode('utf-8')|safe }}</span>
+                    {% endif %}
+                </div>
             {% endfor %}
         </div>
 

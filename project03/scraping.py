@@ -45,7 +45,8 @@ for place in places:
         "X-NCP-APIGW-API-KEY-ID": "m6of6dku4g",
         "X-NCP-APIGW-API-KEY": "HZLvUDOzmUJ4PeZ4WTe8YtlREQuVYmFdWd3gYRgt"
     }
-    # geocode api 호출
+
+    # geocode api 호출 (주소를 기반으로 위도, 경도를 반환)
     r = requests.get(f"https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query={address}", headers=headers)
     response = r.json()
 
@@ -61,7 +62,9 @@ for place in places:
                 "show": show,
                 "episode": episode,
                 "mapx": x,
-                "mapy": y}
+                "mapy": y,
+                "like":'0'
+            }
 
             db.matjips.insert_one(doc)
         else:

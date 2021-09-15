@@ -20,5 +20,25 @@ def get_matjip():
 
     return jsonify({'result': 'success', 'matjip_list': matjip_list})
 
+@app.route('/test', methods=["GET"])
+def test():
+    return render_template("prac_map.html")
+
+@app.route('/like', methods=["POST"])
+def like():
+    print('like')
+    title = request.form['title']
+    address = request.form['address']
+    db.matjips.update_one({'title':title, 'address':address}, {'$set':{'like':'1'}})
+    return jsonify({'result':'ok'})
+
+@app.route('/unlike', methods=["POST"])
+def unlike():
+    print('unlike')
+    title = request.form['title']
+    address = request.form['address']
+    db.matjips.update_one({'title':title, 'address':address}, {'$set':{'like':'0'}})
+    return jsonify({'result':'ok'})
+
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)

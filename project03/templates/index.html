@@ -7,6 +7,13 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title>스파르타코딩클럽 | 맛집 검색</title>
+
+    <meta property="og:title" content="스파르타 맛집 지도"/>
+    <meta property="og:description" content="mini project for Web Plus"/>
+    <meta property="og:image" content="{{ url_for('static', filename='og_image.jpg') }}"/>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+
     <script type="text/javascript"
             src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=m6of6dku4g&submodules=geocoder"></script>
 
@@ -16,6 +23,12 @@
           crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
+
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css"
+    />
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -81,12 +94,18 @@
         .card-title, .card-subtitle {
             display: inline;
         }
+
+        .iw-inner {
+            padding: 10px;
+            font-size: smaller;
+        }
     </style>
     <script>
         let y_cen = 37.4981125   // lat
         let x_cen = 127.0379399  // long
         let map;
         let markers = []
+        let infowindows = []
         $(document).ready(function () {
             map = new naver.maps.Map('map', {
                 center: new naver.maps.LatLng(y_cen, x_cen),
@@ -101,15 +120,50 @@
         })
 
         function make_card(i, matjip) {
+            likebtn_html = ``
+            if (matjip['like'] == '0') {
+                likebtn_html = `<a onclick="like('${matjip['title']}', '${matjip['address']}')"><i class="far fa-thumbs-up"></i></a>`
+            } else {
+                likebtn_html = `<a onclick="unlike('${matjip['title']}', '${matjip['address']}')"><i class="fas fa-thumbs-up"></i></a>`
+            }
             let tmp_html = `<div class="card" id="card-${i}">
                                 <div class="card-body">
-                                    <h5 class="card-title"><a href="#" class="matjip-title">${matjip['title']}</a></h5>
+                                    <h5 class="card-title"><a href="javascript:click2center('${i}')" class="matjip-title">${matjip['title']}</a></h5>
                                     <h6 class="card-subtitle mb-2 text-muted">${matjip['category']}</h6>
+                                    ${likebtn_html}
                                     <p class="card-text">${matjip['address']}</p>
                                     <p class="card-text" style="color:blue;">${matjip['show']}</p>
                                 </div>
                             </div>`
             $('#matjip-box').append(tmp_html)
+        }
+
+        function like(title, address) {
+            $.ajax({
+                type: "POST",
+                data: {title: title, address: address},
+                url: "/like"
+                ,
+                success: function (response) {
+                    if (response['result'] == 'ok') {
+                        get_matjips()
+                    }
+                }
+            })
+        }
+
+        function unlike(title, address) {
+            $.ajax({
+                type: "POST",
+                data: {title: title, address: address},
+                url: "/unlike"
+                ,
+                success: function (response) {
+                    if (response['result'] == 'ok') {
+                        get_matjips()
+                    }
+                }
+            })
         }
 
         function get_matjips() {
@@ -124,18 +178,65 @@
                         let matjip = matjips[i]
                         console.log(matjip)
                         make_card(i, matjip)
+                        marker = make_marker(matjip)
+                        add_info(i, marker, matjip)
                     }
                 }
             });
         }
 
         function make_marker(matjip) {
+            marker_icon = ''
+            if (matjip['like'] == '0') marker_icon = '{{ url_for("static", filename="marker-default.png") }}'
+            else marker_icon = '{{ url_for("static", filename="marker-liked.png") }}'
             let marker = new naver.maps.Marker({
                 position: new naver.maps.LatLng(matjip["mapy"], matjip["mapx"]), // 마커의 위치
-                map: map // 마커를 나타낼 지도
+                map: map, // 마커를 나타낼 지도
+                icon: marker_icon // 마커 이미지
             });
             markers.push(marker)
             return marker
+        }
+
+        function add_info(i, marker, matjip) {
+            let html_temp = `<div class="iw-inner">
+                        <h5>${matjip['title']}</h5>
+                        <p>${matjip['address']}
+                        </div>`;
+            let infowindow = new naver.maps.InfoWindow({
+                content: html_temp,
+                maxWidth: 200,
+                backgroundColor: "#fff",
+                borderColor: "#888",
+                borderWidth: 2,
+                anchorSize: new naver.maps.Size(15, 15),
+                anchorSkew: true,
+                anchorColor: "#fff",
+                pixelOffset: new naver.maps.Point(10, -10)
+            });
+            infowindows.push(infowindow)
+            naver.maps.Event.addListener(marker, "click", function (e) {
+                if (infowindow.getMap()) {
+                    infowindow.close();
+                } else {
+                    infowindow.open(map, marker);
+                    map.setCenter(infowindow.position) // infowindow가 열린 marker가 map의 중앙에 위치하도록 설정
+                    $("#matjip-box").animate({
+                        scrollTop: $("#matjip-box").get(0).scrollTop + $(`#card-${i}`).position().top
+                    }, 2000);
+                }
+            });
+        }
+
+        function click2center(i) {
+            let marker = markers[i]
+            let infowindow = infowindows[i]
+            if (infowindow.getMap()) {
+                infowindow.close();
+            } else {
+                infowindow.open(map, marker);
+                map.setCenter(infowindow.position)
+            }
         }
     </script>
 

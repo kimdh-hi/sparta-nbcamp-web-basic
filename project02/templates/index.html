@@ -129,7 +129,7 @@
         <tbody id="tbody-box">
         {% for word in words %}
             <tr id="word-{{ word.word }}">
-                <td><a href="/detail/{{ word.word }}?status=saved">{{ word.word }}</a></td>
+                <td><a href="/detail/{{ word['word'] }}?status=saved">{{ word.word }}</a></td>
                 <td>{{ word.definition }}</td>
             </tr>
         {% endfor %}

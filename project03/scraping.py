@@ -30,7 +30,23 @@ for place in places:
     address = place.select_one("div.box_module_cont > div > div > div.mil_inner_spot > span.il_text").text
     category = place.select_one("div.box_module_cont > div > div > div.mil_inner_kind > span.il_text").text
     show, episode = place.select_one("div.box_module_cont > div > div > div.mil_inner_tv > span.il_text").text.rsplit(" ", 1)
-    print(title, address, category, show, episode)
+
+    # geocode api 호출을 위한 key를 포함하는 헤더 구성
+    headers = {
+        "X-NCP-APIGW-API-KEY-ID": "m6of6dku4g",
+        "X-NCP-APIGW-API-KEY": "HZLvUDOzmUJ4PeZ4WTe8YtlREQuVYmFdWd3gYRgt"
+    }
+    # geocode api 호출
+    r = requests.get(f"https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query={address}", headers=headers)
+    response = r.json()
+
+    if response["status"] == "OK":
+        if len(response["addresses"]) > 0:
+            x = float(response["addresses"][0]["x"])
+            y = float(response["addresses"][0]["y"])
+            print(title, address, category, show, episode, x, y)
+        else:
+            print(title, "좌표를 찾지 못했습니다")
 
 
 

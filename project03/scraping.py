@@ -16,6 +16,15 @@ url = "http://matstar.sbs.co.kr/location.html"
 driver.get(url) # 해당 url페이지 로드
 time.sleep(5) # 충분한 로딩시간을 위해 5초 대기
 
+# 더보기 버튼 최대 10번까지 클릭
+for i in range(10):
+    try:
+        btn_more = driver.find_element_by_css_selector("#foodstar-front-location-curation-more-self > div > button")
+        btn_more.click()
+        time.sleep(5)
+    except NoSuchElementException:
+        break
+
 req = driver.page_source # 대기 후 완전히 로드된 페이지를 가져옴
 driver.quit()
 
@@ -44,7 +53,17 @@ for place in places:
         if len(response["addresses"]) > 0:
             x = float(response["addresses"][0]["x"])
             y = float(response["addresses"][0]["y"])
-            print(title, address, category, show, episode, x, y)
+
+            doc = {
+                "title": title,
+                "address": address,
+                "category": category,
+                "show": show,
+                "episode": episode,
+                "mapx": x,
+                "mapy": y}
+
+            db.matjips.insert_one(doc)
         else:
             print(title, "좌표를 찾지 못했습니다")
 

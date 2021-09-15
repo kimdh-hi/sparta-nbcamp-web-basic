@@ -8,8 +8,8 @@ owlApiKey = tree.find('string[@name="owlbot-key"]').text
 
 app = Flask(__name__)
 
-#client = MongoClient('내AWS아이피', 27017, username="test", password="test")
-client = MongoClient('localhost',27017)
+client = MongoClient('15.164.211.216', 27017, username="test", password="test")
+#client = MongoClient('localhost',27017)
 db = client.dbsparta_plus_week2
 
 
